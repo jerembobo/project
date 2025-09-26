@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuthStore } from '../stores/authStore';
+import { applyDemoModeFix } from '../utils/demoModeFix';
 
 export type ViewAsRole = 'pro' | 'agency_admin' | 'client_viewer' | 'platform_admin';
 
@@ -57,29 +58,35 @@ export const useAppMode = (tenantId?: string, uiRoleOverride?: ViewAsRole) => {
         throw new Error(data.error || 'Réponse invalide du serveur');
       }
 
-      setMode(data as AppMode);
+      // Appliquer la correction temporaire pour le mode Demo
+      const correctedMode = applyDemoModeFix(data as AppMode);
+      setMode(correctedMode);
     } catch (err: any) {
       console.error('Error fetching app mode:', err);
       setError(err.message);
       
       // Fallback vers le mode démo en cas d'erreur
-      setMode({
-        mode: 'DEMO',
-        role: 'prospect',
-        source: 'mock',
-        tenant_category: 'demo',
+      const fallbackMode = {
+        mode: 'DEMO' as const,
+        role: 'prospect' as const,
+        source: 'mock' as const,
+        tenant_category: 'demo' as const,
         badges: ['🧪 Mode Démo', 'Erreur de connexion'],
         capabilities: {
           canWrite: false,
           canExport: false,
           canSync: false
         },
-        allowed_pages: ['*'],
+        allowed_pages: ['dashboard'],
         features: {},
         traceId: crypto.randomUUID(),
         warnings: ['Impossible de déterminer le mode, basculement en démo'],
         error: err.message
-      });
+      };
+      
+      // Appliquer la correction temporaire pour le mode Demo
+      const correctedFallbackMode = applyDemoModeFix(fallbackMode);
+      setMode(correctedFallbackMode);
     } finally {
       setLoading(false);
     }
@@ -96,22 +103,26 @@ export const useAppMode = (tenantId?: string, uiRoleOverride?: ViewAsRole) => {
       fetchMode(tenantId);
     } else {
       // Mode démo pour les utilisateurs non connectés
-      setMode({
-        mode: 'DEMO',
-        role: 'prospect',
-        source: 'mock',
-        tenant_category: 'demo',
+      const unauthenticatedMode = {
+        mode: 'DEMO' as const,
+        role: 'prospect' as const,
+        source: 'mock' as const,
+        tenant_category: 'demo' as const,
         badges: ['🧪 Mode Démo', 'Connectez-vous pour accéder à vos données'],
         capabilities: {
           canWrite: false,
           canExport: false,
           canSync: false
         },
-        allowed_pages: ['*'],
+        allowed_pages: ['dashboard'],
         features: {},
         traceId: crypto.randomUUID(),
         warnings: ['Connectez-vous pour accéder à toutes les fonctionnalités']
-      });
+      };
+      
+      // Appliquer la correction temporaire pour le mode Demo
+      const correctedUnauthenticatedMode = applyDemoModeFix(unauthenticatedMode);
+      setMode(correctedUnauthenticatedMode);
       setLoading(false);
     }
   }, [user, fetchMode, tenantId]);

@@ -8,6 +8,7 @@ import { useViewAs } from '../../hooks/useViewAs';
 import ModeBadge from '../ui/ModeBadge';
 import { ContextSwitcher } from './ContextSwitcher';
 import { AdminImpersonateToggle } from '../admin/AdminImpersonateToggle';
+import { RoleDebugPanel } from '../admin/RoleDebugPanel';
 import {
   Menu,
   X,
@@ -25,7 +26,8 @@ import {
   Users,
   Shield,
   Database,
-  Crown
+  Crown,
+  LogIn
 } from 'lucide-react';
 
 interface MainLayoutProps {
@@ -35,7 +37,7 @@ interface MainLayoutProps {
 }
 
 const MainLayout: React.FC<MainLayoutProps> = ({ children, title, subtitle }) => {
-  const { profile, signOut } = useAuth();
+  const { profile, signOut, isAuthenticated } = useAuth();
   const { 
     tenantOptions, 
     currentTenantId, 
@@ -174,28 +176,38 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, title, subtitle }) =>
 
         {/* User Section */}
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200 dark:border-gray-700">
-          <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center">
-                <User className="w-4 h-4 text-white" />
+          {isAuthenticated ? (
+            <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center">
+                  <User className="w-4 h-4 text-white" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                    {profile?.full_name || 'Utilisateur'}
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                    {profile?.email}
+                  </p>
+                </div>
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                  {profile?.full_name || 'Utilisateur'}
-                </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                  {profile?.email}
-                </p>
-              </div>
+              <button
+                onClick={handleSignOut}
+                className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
+                title="Se déconnecter"
+              >
+                <Settings className="w-4 h-4" />
+              </button>
             </div>
-            <button
-              onClick={handleSignOut}
-              className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
-              title="Se déconnecter"
+          ) : (
+            <Link
+              to="/login"
+              className="flex items-center justify-center space-x-2 p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
             >
-              <Settings className="w-4 h-4" />
-            </button>
-          </div>
+              <LogIn className="w-4 h-4" />
+              <span className="text-sm font-medium">Se connecter</span>
+            </Link>
+          )}
         </div>
       </aside>
 
@@ -344,6 +356,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, title, subtitle }) =>
           {children}
         </main>
       </div>
+      
+      {/* Debug Panel temporaire */}
+      <RoleDebugPanel />
     </div>
   );
 };

@@ -57,7 +57,7 @@ async function computeUserModeExtended(supabaseClient: any, userId: string): Pro
           canExport: false,
           canSync: false
         },
-        allowed_pages: ['*'],
+        allowed_pages: ['dashboard'],
         features: {},
         traceId,
         warnings: ['Erreur lors de la détection du mode, basculement en démo']
@@ -133,7 +133,7 @@ async function computeUserModeExtended(supabaseClient: any, userId: string): Pro
         canExport: false,
         canSync: false
       },
-      allowed_pages: ['*'],
+      allowed_pages: ['dashboard'],
       features: {},
       traceId,
       error: error.message || 'Erreur interne'
@@ -262,7 +262,7 @@ serve(async (req) => {
             canExport: false,
             canSync: false
           },
-          allowed_pages: ['*'],
+          allowed_pages: ['dashboard'],
           features: {},
           traceId: crypto.randomUUID(),
           warnings: ['Connectez-vous pour accéder à toutes les fonctionnalités']
